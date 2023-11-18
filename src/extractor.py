@@ -48,28 +48,27 @@ def separate_question_elements(question: str) -> (str, [str]):
         str: enunciado
         [str]: lista de alternativas
     """
-    # procura pelo enunciado da questão
-    statement_pattern = re.compile(r'^(.*?)(?=\sA\sA)', re.DOTALL)
-    statement_match = re.search(statement_pattern, question)
-
-    statement = statement_match.group(1).strip() if statement_match else ''
-
-    # Find the alternatives (A to E)
-    alternatives_pattern = re.compile(r'([A-E])\s\1\s\[(.*?)\]', re.DOTALL)
-    alternatives = {match.group(1): match.group(2).strip() for match in re.finditer(alternatives_pattern, question)}
     
-    # TODO n tá funfando; gepeto trolou
+    # procura pelos delimitadores de alternativas
+    enem_pattern = re.compile(r'A A |B B |C C |D D |E E ')
+    match = re.split(enem_pattern, question)
+    
+    statement = match[0]
+    alternatives = match[1:]
+    
     return statement, alternatives
 
 
 def test():
     txt = get_raw_text("texto_bruto_enem")
     questions = separate_questions(txt)
-    question = questions[19]
+    question = questions[21]
     statement, alternatives = separate_question_elements(question)
     
-    print(question)
     print(statement)
-    print(alternatives)
-
+    print(f'(A) {alternatives[0]}')
+    print(f'(B) {alternatives[1]}')
+    print(f'(C) {alternatives[2]}')
+    print(f'(D) {alternatives[3]}')
+    print(f'(E) {alternatives[4]}')
 test()
