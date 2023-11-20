@@ -1,18 +1,9 @@
 import gdown
 import os
+import yaml
 
 EXAMS_PATH = '../exams'
-
-ENEM_EDITIONS = [
-    {
-        'exam': 'enem',
-        'edition': 'primeiro dia',
-        'year': 2023,
-        'exam_url': '1UOkN0ejTZHzyVRRivHJBCtSeTA3OFrqH',
-        'answer_sheet_url':'1aCFWWoqV1l9z_68-24okOVwUiF79yv48'
-    }
-]
-
+EXAMS_CONF_PATH = '../conf/exams.yaml'
 
 def download_enem_exams(exams: dict) -> None:
     """Baixa todas as provas do enem, da pasta do drive
@@ -49,4 +40,12 @@ def download_file(file_id: str, file_name: str):
     return
 
 
-download_enem_exams(ENEM_EDITIONS)
+def main():
+    with open(EXAMS_CONF_PATH) as config_file:
+        data = yaml.safe_load(config_file)
+    
+    download_enem_exams(data['enem_exams'])
+    
+
+if __name__ == '__main__':
+    main()
