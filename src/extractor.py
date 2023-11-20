@@ -59,11 +59,45 @@ def separate_question_elements(question: str) -> (str, [str]):
     return statement, alternatives
 
 
+def format_question(statement: str, alternatives: [str]) -> (str, [str]):
+    """Formata a questão para corrigir problemas de espaçamento, ortografia,
+    formatação em geral, etc.
+
+    Args:
+        statement (str): enunciado original, não formatado
+        alternatives ([str]): alternativas da questão, originais, não formatadas
+        
+    Returns:
+        str: enunciado formatado
+        [str]: alternativas formatadas
+    """
+    new_statement = normalize_white_spaces(statement)
+    new_alternatives = [normalize_white_spaces(alternative) for alternative in alternatives]
+    
+    return new_statement, new_alternatives
+
+
+def normalize_white_spaces(text: str) -> str:
+    """Corrige problemas de espaçamento irregular no texto, trocando tabs por
+    whitespaces padrão.
+
+    Args:
+        text (str): texto original não formatado
+
+    Returns:
+        str: texto formatado, com correção dos espaçamentos
+    """
+    corrected_text = re.sub(r'\s+', ' ', text)
+    
+    return corrected_text
+
+
 def test():
     txt = get_raw_text("texto_bruto_enem")
     questions = separate_questions(txt)
     question = questions[21]
     statement, alternatives = separate_question_elements(question)
+    statement, alternatives = format_question(statement, alternatives)
     
     print(statement)
     print(f'(A) {alternatives[0]}')
@@ -71,4 +105,6 @@ def test():
     print(f'(C) {alternatives[2]}')
     print(f'(D) {alternatives[3]}')
     print(f'(E) {alternatives[4]}')
+    
+    
 test()
