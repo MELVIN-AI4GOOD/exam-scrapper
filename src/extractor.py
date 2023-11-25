@@ -34,7 +34,7 @@ def separate_questions(exam_raw_txt: str) -> [str]:
     # remover elementos vazios resultantes da divisão
     questions = [question.strip() for question in questions if question.strip()]
 
-    return questions
+    return questions[1:]
 
 
 def separate_question_elements(question: str) -> (str, [str]):
@@ -91,33 +91,67 @@ def normalize_white_spaces(text: str) -> str:
     
     return corrected_text
 
+
 def get_answers(text):
     pattern = re.compile(r'(\d+)\s+([A-Za-z])')
 
     answers = pattern.findall(text)
 
-    gabarito = {int(number): answer.upper() for number, answer in answers}
+    gabarito = [(int(number), answer.upper()) for number, answer in answers]
+    
+    return gabarito
+    
 
-    print(gabarito)
+def scrappe_enem(year, day):
+    exam_name = f'{year}_enem_{day}_dia'
+    exam = get_raw_text(exam_name)
+    raw_questions = separate_questions(exam)
+    
+    answer_sheet_name = f'{year}_enem_{day}_dia_gabarito'
+    answer_sheet = get_raw_text(answer_sheet_name)
+    answers = get_answers(answer_sheet)
+    
+    questions = []
+    
+    for question in raw_questions:
+        statement, alternatives = separate_question_elements(question)
+        statement, alternatives = format_question(statement, alternatives)
+        
+        questions.append([statement, alternatives])
+    
+    return questions, answers
 
+
+def scrappe_enem_edition(year):
+    first_day_questions, first_day_answers = scrappe_enem(year, 1)
+    second_day_questions, second_day_answers = scrappe_enem(year, 2)
+    
+    all_questions = first_day_questions + second_day_questions
+    all_answers = first_day_answers + second_day_answers
+    
+    print(len(all_questions))
+    print(all_answers)
+    
+    return 0, 0
+    
 
 def test2():
-    txt = get_raw_text("texto_bruto_enem")
+    txt = get_raw_text("2023_enem_1_dia")
     questions = separate_questions(txt)
-    question = questions[21]
+    
+    question = questions[16]
     statement, alternatives = separate_question_elements(question)
     statement, alternatives = format_question(statement, alternatives)
-    
+
     print(statement)
-    print(f'(A) {alternatives[0]}')
-    print(f'(B) {alternatives[1]}')
-    print(f'(C) {alternatives[2]}')
-    print(f'(D) {alternatives[3]}')
-    print(f'(E) {alternatives[4]}')
+    print(alternatives)
 
 
 def test():
-    txt = get_raw_text('2016_enem_1_dia_gabarito')
-    get_answers(txt)
+    questions, answers = scrappe_enem_edition(2023)
+    
+    # print(questions[45][0])
+    # print(questions[45][1:])
+    # print(answers[50])
     
 test()
