@@ -91,8 +91,17 @@ def normalize_white_spaces(text: str) -> str:
     
     return corrected_text
 
+def get_answers(text):
+    pattern = re.compile(r'(\d+)\s+([A-Za-z])')
 
-def test():
+    answers = pattern.findall(text)
+
+    gabarito = {int(number): answer.upper() for number, answer in answers}
+
+    print(gabarito)
+
+
+def test2():
     txt = get_raw_text("texto_bruto_enem")
     questions = separate_questions(txt)
     question = questions[21]
@@ -105,6 +114,10 @@ def test():
     print(f'(C) {alternatives[2]}')
     print(f'(D) {alternatives[3]}')
     print(f'(E) {alternatives[4]}')
-    
+
+
+def test():
+    txt = get_raw_text('2016_enem_1_dia_gabarito')
+    get_answers(txt)
     
 test()
