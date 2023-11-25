@@ -93,7 +93,7 @@ def normalize_white_spaces(text: str) -> str:
 
 
 def get_answers(text):
-    pattern = re.compile(r'(\d+)\s+([A-Za-z])')
+    pattern = re.compile(r'^(\d+)\s+([A-E])', re.MULTILINE)
 
     answers = pattern.findall(text)
 
