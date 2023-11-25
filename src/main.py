@@ -46,12 +46,30 @@ def save_raw_text(exam_name: str, text: str) -> None:
     return
 
 
+def scrappe_enem(year):
+    exams_filenames = [
+        f'{year}_enem_1_dia',
+        f'{year}_enem_1_dia_gabarito',
+        f'{year}_enem_2_dia',
+        f'{year}_enem_2_dia_gabarito',
+    ]
+    
+    exams_paths = [f'../exams/{exam_filename}.pdf' for exam_filename in exams_filenames]
+    
+    exams = [get_exam(exam_path) for exam_path in exams_paths]
+    
+    raw_txts = [get_raw_text(exam) for exam in exams]
+    
+    for i in range(4):
+        save_raw_text(f'{exams_filenames[i]}', raw_txts[i])
+        
+
 def main():
     print("MELVIN EXAM SCRAPPER")
+    enem_editions = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
     
-    exam = get_exam("../exams/enem.pdf")
-    raw_txt = get_raw_text(exam)
-    save_raw_text("texto_bruto_enem", raw_txt)
+    for enem_edition in enem_editions:
+        scrappe_enem(enem_edition)
 
 
 if __name__ == "__main__":
