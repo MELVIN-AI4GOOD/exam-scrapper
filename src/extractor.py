@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 
 DEFAULT_RAW_TXT_PATH = '../raw_txts'
 
@@ -144,10 +145,19 @@ def scrappe_enem_edition(year):
     all_questions = first_day_questions + second_day_questions
     all_answers = first_day_answers + second_day_answers
     
-    print(len(all_questions))
-    print(all_answers)
+    return all_questions, all_answers
+
+def generate_dataframe(edition):
+    questions, answers = scrappe_enem_edition(edition)
     
-    return 0, 0
+    # cria os 2 dataframes
+    df1 = pd.DataFrame(questions, columns=['enunciado', 'alternativas'])
+    df2 = pd.DataFrame(answers, columns=['questao', 'gabarito'])
+
+    # junta os 2 dataframes
+    result_df = pd.concat([df2, df1], axis=1)
+
+    return result_df
     
 
 def test2():
