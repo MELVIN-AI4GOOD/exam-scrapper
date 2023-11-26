@@ -104,6 +104,16 @@ def get_answers(text):
 
     gabarito = [(int(number), answer.upper()) for number, answer in answers]
     
+    gabarito = sorted(gabarito, key=lambda x: x[0])
+    
+    # inglês e espanhol eu separei em 10 questões diferente
+    # poderia também retornar o gabarito com 5 questões especiais ('1', 'A', 'B')
+    pattern = re.compile(r'^(\d+)\s+([A-E])\s+([A-E])', re.MULTILINE)
+    ing_esp = pattern.findall(text)
+    esp = [(item[0], item[2]) for item in ing_esp]
+    for answer in esp:
+        gabarito.insert(int(answer[0])-1+5, answer)
+    
     return gabarito
     
 
