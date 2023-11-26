@@ -175,8 +175,22 @@ def test2():
 def test():
     questions, answers = scrappe_enem_edition(2023)
     
-    # print(questions[45][0])
-    # print(questions[45][1:])
-    # print(answers[50])
+    #print(questions[183][0])
+    #print(questions[183][1])
+    #print(questions[45][1:])
+    print(answers)
+    print(len(answers))
+    #print(questions)
+
+def main():
+    print("MELVIN EXAM DATAFRAME GENERATOR")
+    enem_editions = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
     
-test()
+    for enem_edition in enem_editions:
+        df = generate_dataframe(enem_edition)
+        print(f'\nEnem {enem_edition}')
+        print(df)
+        df.to_csv(f'../data/enem_{enem_edition}.csv', index=False)
+
+if __name__ == "__main__":
+    main()
