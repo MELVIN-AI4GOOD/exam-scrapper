@@ -49,12 +49,17 @@ def separate_question_elements(question: str) -> (str, [str]):
         [str]: lista de alternativas
     """
     
-    # procura pelos delimitadores de alternativas
-    enem_pattern = re.compile(r'A A |B B |C C |D D |E E ')
+    # procura pelos delimitadores de alternativas (A-E no início de linha)
+    enem_pattern = re.compile(r'^[A-E]\s[A-E] |^[A-E]\s', re.MULTILINE)
     match = re.split(enem_pattern, question)
     
-    statement = match[0]
-    alternatives = match[1:]
+    # considerando que os 5 últimos matches são as alternativas
+    try:
+        statement = ''.join(match[0:-5])
+        alternatives = match[-5:]
+    except:
+        statement = match[0]
+        alternatives = match[1:]
     
     return statement, alternatives
 
