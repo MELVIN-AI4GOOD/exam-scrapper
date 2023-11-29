@@ -19,7 +19,7 @@ def get_raw_text(exam_name: str) -> str:
     return f.read()
 
 
-def separate_questions(exam_raw_txt: str) -> [str]:
+def separate_questions(exam_raw_txt: str, obj = False) -> [str]:
     """Separa questões do enem por 
 
     Args:
@@ -29,7 +29,10 @@ def separate_questions(exam_raw_txt: str) -> [str]:
         [str]: lista de questões (texto bruto, com enunciado e alternativas)
     """
     # padrão regex para pegar questões do enem
-    enem_pattern = re.compile(r'QUESTÃO \d+', re.IGNORECASE)
+    if obj:
+        enem_pattern = re.compile(r'^1  |^46  |^91  |^136  |^1\n|^46\n|^91\n|^136\n|OO//220022\d\d+[1-9] |OO//220022\d\d+[1-9][0-9] |OO//220022\d\d+1[0-7][0-9] |OO//220022\d\d+180 |OO//220022\d\d+[1-9]\n|OO//220022\d\d+[1-9][0-9]\n|OO//220022\d\d+1[0-7][0-9]\n|OO//220022\d\d+180\n', re.MULTILINE)
+    else:
+        enem_pattern = re.compile(r'QUESTÃO \d+', re.IGNORECASE)
     questions = re.split(enem_pattern, exam_raw_txt)
 
     # remover elementos vazios resultantes da divisão
@@ -37,8 +40,7 @@ def separate_questions(exam_raw_txt: str) -> [str]:
 
     return questions[1:]
 
-
-def separate_question_elements(question: str) -> (str, [str]):
+def separate_question_elements(question: str, obj = False) -> (str, [str]):
     """Separa a questão em seus elementos básicos, ou seja, enunciado
     e alternativas.
 
@@ -51,17 +53,20 @@ def separate_question_elements(question: str) -> (str, [str]):
     """
     
     # procura pelos delimitadores de alternativas (A-E no início de linha)
-    enem_pattern = re.compile(r'^[A-E]\s[A-E] |^[A-E]\s', re.MULTILINE)
+    if obj:
+        enem_pattern = re.compile(r'[a-e]\) ')
+    else:
+        enem_pattern = re.compile(r'^[A-E]\s[A-E] |^[A-E]\s', re.MULTILINE)
     match = re.split(enem_pattern, question)
     
     # considerando que os 5 últimos matches são as alternativas
-    try:
+    if(len(match) >= 6):
         statement = ''.join(match[0:-5])
         alternatives = match[-5:]
-    except:
+    else:
         statement = match[0]
         alternatives = match[1:]
-    
+        
     return statement, alternatives
 
 
@@ -77,8 +82,14 @@ def format_question(statement: str, alternatives: [str]) -> (str, [str]):
         str: enunciado formatado
         [str]: alternativas formatadas
     """
-    new_statement = normalize_white_spaces(statement)
-    new_alternatives = [normalize_white_spaces(alternative) for alternative in alternatives]
+    try:
+        new_statement = normalize_white_spaces(statement)
+    except:
+        new_statement = statement
+    try:
+        new_alternatives = [normalize_white_spaces(alternative) for alternative in alternatives]
+    except:
+        new_alternatives = alternatives
     
     return new_statement, new_alternatives
 
@@ -93,8 +104,10 @@ def normalize_white_spaces(text: str) -> str:
     Returns:
         str: texto formatado, com correção dos espaçamentos
     """
-    corrected_text = re.sub(r'\s+', ' ', text)
-    
+    try:
+        corrected_text = re.sub(r'\s+', ' ', text)
+    except:
+        corrected_text = text
     return corrected_text
 
 
@@ -118,10 +131,13 @@ def get_answers(text):
     return gabarito
     
 
-def scrappe_enem(year, day):
-    exam_name = f'{year}_enem_{day}_dia'
+def scrappe_enem(year, day, obj = False):
+    if obj:
+        exam_name = f'{year}_enem_{day}_dia_obj'
+    else:
+        exam_name = f'{year}_enem_{day}_dia'
     exam = get_raw_text(exam_name)
-    raw_questions = separate_questions(exam)
+    raw_questions = separate_questions(exam, obj)
     
     answer_sheet_name = f'{year}_enem_{day}_dia_gabarito'
     answer_sheet = get_raw_text(answer_sheet_name)
@@ -130,7 +146,7 @@ def scrappe_enem(year, day):
     questions = []
     
     for question in raw_questions:
-        statement, alternatives = separate_question_elements(question)
+        statement, alternatives = separate_question_elements(question, obj)
         statement, alternatives = format_question(statement, alternatives)
         
         questions.append([statement, alternatives])
@@ -138,17 +154,17 @@ def scrappe_enem(year, day):
     return questions, answers
 
 
-def scrappe_enem_edition(year):
-    first_day_questions, first_day_answers = scrappe_enem(year, 1)
-    second_day_questions, second_day_answers = scrappe_enem(year, 2)
+def scrappe_enem_edition(year, obj = False):
+    first_day_questions, first_day_answers = scrappe_enem(year, 1, obj)
+    second_day_questions, second_day_answers = scrappe_enem(year, 2, obj)
     
     all_questions = first_day_questions + second_day_questions
     all_answers = first_day_answers + second_day_answers
     
     return all_questions, all_answers
 
-def generate_dataframe(edition):
-    questions, answers = scrappe_enem_edition(edition)
+def generate_dataframe(edition, obj = False):
+    questions, answers = scrappe_enem_edition(edition, obj)
     
     # cria os 2 dataframes
     df1 = pd.DataFrame(questions, columns=['enunciado', 'alternativas'])
@@ -191,6 +207,14 @@ def main():
         print(f'\nEnem {enem_edition}')
         print(df)
         df.to_csv(f'../data/enem_{enem_edition}.csv', index=False)
+    
+    enem_editions_obj = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
+    
+    for enem_edition_obj in enem_editions_obj:
+        df = generate_dataframe(enem_edition_obj, obj=True)
+        print(f'\nEnem {enem_edition_obj}')
+        print(df)
+        df.to_csv(f'../data/enem_{enem_edition_obj}_obj.csv', index=False)
 
 if __name__ == "__main__":
     main()
