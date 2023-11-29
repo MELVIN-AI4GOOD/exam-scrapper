@@ -46,13 +46,21 @@ def save_raw_text(exam_name: str, text: str) -> None:
     return
 
 
-def scrappe_enem(year):
-    exams_filenames = [
-        f'{year}_enem_1_dia',
-        f'{year}_enem_1_dia_gabarito',
-        f'{year}_enem_2_dia',
-        f'{year}_enem_2_dia_gabarito',
-    ]
+def scrappe_enem(year, obj = False):
+    if obj:
+        exams_filenames = [
+            f'{year}_enem_1_dia_obj',
+            f'{year}_enem_1_dia_gabarito',
+            f'{year}_enem_2_dia_obj',
+            f'{year}_enem_2_dia_gabarito',
+        ]
+    else:
+        exams_filenames = [
+            f'{year}_enem_1_dia',
+            f'{year}_enem_1_dia_gabarito',
+            f'{year}_enem_2_dia',
+            f'{year}_enem_2_dia_gabarito',
+        ]
     
     exams_paths = [f'../exams/{exam_filename}.pdf' for exam_filename in exams_filenames]
     
@@ -66,10 +74,16 @@ def scrappe_enem(year):
 
 def main():
     print("MELVIN EXAM SCRAPPER")
-    enem_editions = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
     
-    for enem_edition in enem_editions:
-        scrappe_enem(enem_edition)
+    enem_editions = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
+    """ for enem_edition in enem_editions:
+        print(f"Working on enem {enem_edition}...", end='\r', flush=True)
+        scrappe_enem(enem_edition) """
+
+    enem_editions_obj = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023]
+    for enem_edition_obj in enem_editions_obj:
+        print(f"Working on enem {enem_edition_obj}...", end='\r', flush=True)
+        scrappe_enem(enem_edition_obj, obj = True)
 
 
 if __name__ == "__main__":
