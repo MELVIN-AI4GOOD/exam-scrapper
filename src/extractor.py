@@ -63,9 +63,17 @@ def separate_question_elements(question: str, obj = False) -> (str, [str]):
     if(len(match) >= 6):
         statement = ''.join(match[0:-5])
         alternatives = match[-5:]
+        if obj:
+            pattern = re.compile(r'Resolução')
+            match = re.split(pattern, alternatives[-1])
+            alternatives[-1] = match[0]
+            if len(match) != 2:
+                alternatives = []
     else:
         statement = match[0]
         alternatives = match[1:]
+    
+
         
     return statement, alternatives
 
@@ -173,6 +181,10 @@ def generate_dataframe(edition, obj = False):
     # junta os 2 dataframes
     result_df = pd.concat([df2, df1], axis=1)
 
+    # Filter rows based on the length of the 'alternativas' column
+    result_df = result_df[result_df['alternativas'].apply(lambda x: isinstance(x, list) and len(x) == 5)]
+    result_df.dropna(inplace=True)
+
     return result_df
     
 
@@ -205,6 +217,7 @@ def main():
     for enem_edition in enem_editions:
         df = generate_dataframe(enem_edition)
         print(f'\nEnem {enem_edition}')
+        df['enem_ano'] = enem_edition
         print(df)
         df.to_csv(f'../data/enem_{enem_edition}.csv', index=False)
     
@@ -213,6 +226,7 @@ def main():
     for enem_edition_obj in enem_editions_obj:
         df = generate_dataframe(enem_edition_obj, obj=True)
         print(f'\nEnem {enem_edition_obj}')
+        df['enem_ano'] = enem_edition_obj
         print(df)
         df.to_csv(f'../data/enem_{enem_edition_obj}_obj.csv', index=False)
 
